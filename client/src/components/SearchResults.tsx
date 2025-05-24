@@ -18,14 +18,14 @@ export default function SearchResults({
   }
 
   return (
-    <div className="mt-2 bg-base-100 rounded-lg shadow-lg absolute w-full z-10">
+    <div className="mt-2 bg-base-100 rounded-lg shadow-lg absolute w-full max-w-[350px] z-10 max-h-[200px] overflow-y-auto">
       {users.map((user) => (
         <div
           key={user.id}
-          className="flex items-center gap-3 p-3 hover:bg-primary/10 cursor-pointer transition-colors"
+          className="flex items-center gap-3 p-3 hover:bg-primary/10 cursor-pointer transition-colors overflow-hidden"
           onClick={() => onSelectUser(user)}
         >
-          <div className="avatar">
+          <div className="avatar flex-shrink-0">
             <div className="w-8">
               <img
                 src={
@@ -37,7 +37,9 @@ export default function SearchResults({
               />
             </div>
           </div>
-          <span className="font-semibold">{user.pseudo}</span>
+          <span className="font-semibold truncate flex-1 min-w-0">
+            {user.pseudo}
+          </span>
         </div>
       ))}
     </div>

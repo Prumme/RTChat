@@ -152,9 +152,9 @@ export default function ChatWindow() {
           chats.map((chat) => <Message key={chat.id} message={chat} />)}
 
         {chats.length === 0 && (
-          <div className="flex flex-col justify-center items-center h-full">
+          <div className="z-10 flex flex-col justify-center items-center h-full">
             <p className="text-base-content">Aucun message</p>
-            <p className="text-base-content/50">Entamez une conversation</p>
+            <p className="text-base-content/50">Entamez la conversation</p>
           </div>
         )}
 

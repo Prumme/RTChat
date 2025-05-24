@@ -1,4 +1,4 @@
-import { Search } from "lucide-react";
+import { Search, Plus } from "lucide-react";
 import { useGroup } from "../contexts/groupContext";
 import { useUser } from "../contexts/userContext";
 import { useEffect, useState, useCallback } from "react";
@@ -8,6 +8,7 @@ import { Message } from "react-hook-form";
 import debounce from "lodash.debounce";
 import SearchResults from "./SearchResults";
 import { User } from "../types/user";
+import CreateGroupModal from "./CreateGroupModal";
 
 export default function ChatSidebar() {
   const { group: selectedGroup, setGroup } = useGroup();
@@ -20,6 +21,7 @@ export default function ChatSidebar() {
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState<User[]>([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [isCreateGroupModalOpen, setIsCreateGroupModalOpen] = useState(false);
 
   // Fonction de recherche avec debounce
   const debouncedSearch = useCallback(
@@ -80,6 +82,31 @@ export default function ChatSidebar() {
       setSearchTerm("");
       setSearchResults([]);
       setIsSearching(false);
+    } catch (error) {
+      console.error("Erreur lors de la création du groupe:", error);
+    }
+  };
+
+  // Fonction pour créer un nouveau groupe avec plusieurs participants
+  const handleCreateGroup = async (participants: User[], name?: string) => {
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_SERVER_URL}/groups`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            participants: [...participants.map((p) => p.id), user?.id],
+            name,
+          }),
+        }
+      );
+      const newGroup = await response.json();
+      setGroups((prev) => [newGroup, ...prev]);
+      setGroup(newGroup);
     } catch (error) {
       console.error("Erreur lors de la création du groupe:", error);
     }
@@ -147,7 +174,15 @@ export default function ChatSidebar() {
 
   return (
     <aside className="w-44 lg:w-72 bg-white/40 backdrop-blur-sm shadow-xl p-6 rounded-l-lg border-r border-base-300">
-      <h2 className="text-xl mb-6 text-center">Mes groupes</h2>
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-xl">Mes groupes</h2>
+        <button
+          onClick={() => setIsCreateGroupModalOpen(true)}
+          className="btn btn-circle btn-sm btn-primary"
+        >
+          <Plus className="w-4 h-4" />
+        </button>
+      </div>
 
       <div className="relative">
         <label className="input input-bordered">
@@ -223,6 +258,14 @@ export default function ChatSidebar() {
           </li>
         )}
       </ul>
+
+      <CreateGroupModal
+        isOpen={isCreateGroupModalOpen}
+        onClose={() => setIsCreateGroupModalOpen(false)}
+        onCreateGroup={handleCreateGroup}
+        token={token || ""}
+        currentUserId={user?.id || ""}
+      />
     </aside>
   );
 }

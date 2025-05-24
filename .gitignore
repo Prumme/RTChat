@@ -1,0 +1,8 @@
+# Minio storage
+minio/
+minio_data/
+.minio.sys/
+data/
+.data/
+
+# ... existing code ... 
