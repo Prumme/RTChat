@@ -1,0 +1,47 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:15
+    restart: always
+    container_name: postgres_db
+    environment:
+      POSTGRES_USER: aurelien
+      POSTGRES_PASSWORD: aurel
+      POSTGRES_DB: rtchat
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: nest_backend
+    depends_on:
+      - postgres
+    environment:
+      DATABASE_URL: postgresql://aurelien:aurel@postgres:5432/rtchat
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./server:/app
+
+    command: npm run start:dev
+
+  minio:
+    image: minio/minio
+    container_name: minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: admin
+      MINIO_ROOT_PASSWORD: admin123
+    volumes:
+      - ./minio-data:/data
+    command: server /data --console-address ":9001"
+
+volumes:
+  postgres_data:
