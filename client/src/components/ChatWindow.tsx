@@ -104,6 +104,8 @@ export default function ChatWindow() {
     const formData = new FormData(e.target as HTMLFormElement);
     const message = formData.get("message") as string;
 
+    if (message.length === 0) return;
+
     if (!chatSocket || !user || !group) return;
 
     try {

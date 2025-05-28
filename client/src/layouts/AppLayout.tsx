@@ -1,8 +1,11 @@
 import { Link, Outlet } from "react-router-dom";
 import { useUser } from "../contexts/userContext";
+import { useAuth } from "../hooks/useAuth";
 
 const AppLayout = () => {
   const { user } = useUser();
+  const { logout } = useAuth();
+
   if (user) {
     return (
       <div className="flex flex-col h-screen bg-gradient-to-tl from-slate-200/80 to-sky-300/50">
@@ -32,15 +35,17 @@ const AppLayout = () => {
               </div>
               <ul
                 tabIndex={0}
-                className="menu menu-sm dropdown-content bg-base-100 rounded-box z-[9999] mt-3 w-26 p-2 shadow"
+                className="menu menu-sm dropdown-content bg-base-100 rounded-box z-[9999] mt-3 w-32 p-2 shadow"
               >
                 <li>
                   <Link to={"/profile"} className="justify-between">
-                    Profile
+                    Profil
                   </Link>
                 </li>
                 <li>
-                  <a>Logout</a>
+                  <button onClick={logout} className="">
+                    <span>Se déconnecter</span>
+                  </button>
                 </li>
               </ul>
             </div>
@@ -50,6 +55,7 @@ const AppLayout = () => {
       </div>
     );
   }
+  return null;
 };
 
 export default AppLayout;

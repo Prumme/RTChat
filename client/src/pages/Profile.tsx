@@ -5,9 +5,10 @@ import { toast } from "react-hot-toast";
 const Profile = () => {
   const { user, token, setUser } = useUser();
   const [pseudo, setPseudo] = useState(user?.pseudo || "");
+  const [color, setColor] = useState(user?.color || "#000000");
   const [isLoading, setIsLoading] = useState(false);
 
-  const handlePseudoSubmit = async (e: React.FormEvent) => {
+  const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
 
@@ -21,19 +22,19 @@ const Profile = () => {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({ pseudo }),
+          body: JSON.stringify({ pseudo, color }),
         }
       );
 
       if (!response.ok)
-        throw new Error("Erreur lors de la mise à jour du pseudo");
+        throw new Error("Erreur lors de la mise à jour du profil");
 
       const updatedUser = await response.json();
       setUser(updatedUser);
       localStorage.setItem("user", JSON.stringify(updatedUser));
-      toast.success("Pseudo mis à jour avec succès !");
+      toast.success("Profil mis à jour avec succès !");
     } catch (error) {
-      toast.error("Erreur lors de la mise à jour du pseudo");
+      toast.error("Erreur lors de la mise à jour du profil");
     } finally {
       setIsLoading(false);
     }
@@ -108,7 +109,7 @@ const Profile = () => {
           </div>
         </div>
 
-        <form onSubmit={handlePseudoSubmit} className="space-y-4">
+        <form onSubmit={handleProfileSubmit} className="space-y-4">
           <div className="form-control">
             <label className="label">
               <span className="label-text">Pseudo</span>
@@ -121,6 +122,22 @@ const Profile = () => {
               placeholder="Votre pseudo"
               disabled={isLoading}
             />
+          </div>
+
+          <div className="form-control">
+            <label className="label">
+              <span className="label-text">Couleur</span>
+            </label>
+            <div className="flex gap-4 items-center">
+              <input
+                type="color"
+                value={color}
+                onChange={(e) => setColor(e.target.value)}
+                className="w-24 h-12 cursor-pointer rounded"
+                disabled={isLoading}
+              />
+              <span className="text-sm opacity-70">{color}</span>
+            </div>
           </div>
 
           <button

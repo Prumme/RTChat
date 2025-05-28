@@ -38,5 +38,13 @@ export function useAuth() {
     navigate("/");
   };
 
-  return { login, register };
+  const logout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    setUser(null);
+    setToken(null);
+    navigate("/login");
+  };
+
+  return { login, register, logout };
 }
