@@ -159,17 +159,18 @@ export default function ChatWindow() {
             <p className="text-base-content/50">Entamez la conversation</p>
           </div>
         )}
-
-        {typingUsers.size > 0 && (
-          <div className="text-sm text-base-content/50 italic animate-bounce">
-            {Array.from(typingUsers).join(", ")}{" "}
-            {typingUsers.size === 1
-              ? "est en train d'écrire..."
-              : "sont en train d'écrire..."}
-          </div>
-        )}
         <div ref={messagesEndRef} />
       </div>
+
+      {typingUsers.size > 0 && (
+        <div className="text-sm text-base-content/50 italic animate-bounce mb-2">
+          {Array.from(typingUsers).join(", ")}{" "}
+          {typingUsers.size === 1
+            ? "est en train d'écrire..."
+            : "sont en train d'écrire..."}
+        </div>
+      )}
+
       <form
         onSubmit={handleSubmit}
         className="mt-6 flex items-center gap-3 sticky bottom-8 left-0 right-0"

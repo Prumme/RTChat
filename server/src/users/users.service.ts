@@ -55,7 +55,6 @@ export class UserService {
       where: [{ pseudo: ILike(`%${query}%`) }],
       select: ['id', 'pseudo', 'avatar', 'color'],
     });
-    console.log(users);
     return users;
   }
 

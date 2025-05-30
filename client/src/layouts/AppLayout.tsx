@@ -1,10 +1,17 @@
-import { Link, Outlet } from "react-router-dom";
+import { Link, Outlet, useNavigate } from "react-router-dom";
 import { useUser } from "../contexts/userContext";
 import { useAuth } from "../hooks/useAuth";
 
 const AppLayout = () => {
   const { user } = useUser();
   const { logout } = useAuth();
+  const navigate = useNavigate();
+
+  console.log(user);
+
+  if (user === null) {
+    navigate("/login");
+  }
 
   if (user) {
     return (

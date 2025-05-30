@@ -9,10 +9,12 @@ import debounce from "lodash.debounce";
 import SearchResults from "./SearchResults";
 import { User } from "../types/user";
 import CreateGroupModal from "./CreateGroupModal";
+import { useAuth } from "../hooks/useAuth";
 
 export default function ChatSidebar() {
   const { group: selectedGroup, setGroup } = useGroup();
   const { user, token } = useUser();
+  const { logout } = useAuth();
   const { groupSocket } = useSocket();
   const [groups, setGroups] = useState<Omit<Group, "chats">[]>([]);
   const [unreadMessages, setUnreadMessages] = useState<Record<string, number>>(
@@ -76,6 +78,7 @@ export default function ChatSidebar() {
           }),
         }
       );
+
       const newGroup = await response.json();
       setGroups((prev) => [newGroup, ...prev]);
       setGroup(newGroup);
@@ -114,6 +117,11 @@ export default function ChatSidebar() {
 
   useEffect(() => {
     const fetchGroups = async () => {
+      if (token === undefined) return;
+      if (user === null) {
+        logout();
+        return;
+      }
       const response = await fetch(
         import.meta.env.VITE_SERVER_URL + "/users/me/groups",
         {
@@ -122,6 +130,11 @@ export default function ChatSidebar() {
           },
         }
       );
+
+      if (!response.ok) {
+        logout();
+      }
+
       const data = await response.json();
       setGroups(data);
 
@@ -178,7 +191,7 @@ export default function ChatSidebar() {
         <h2 className="text-xl">Mes groupes</h2>
         <button
           onClick={() => setIsCreateGroupModalOpen(true)}
-          className="btn btn-circle btn-sm btn-primary"
+          className="btn btn-circle btn-sm btn-primary cursor-pointer"
         >
           <Plus className="w-4 h-4" />
         </button>

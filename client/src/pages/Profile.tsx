@@ -97,7 +97,12 @@ const Profile = () => {
 
           <div className="form-control w-full max-w-xs">
             <label className="label">
-              <span className="label-text">Changer l'avatar</span>
+              <span className="label-text">
+                Changer l'avatar
+                <span className="text-xs text-base-content/50">
+                  (max: 16MB)
+                </span>
+              </span>
             </label>
             <input
               type="file"

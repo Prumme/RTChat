@@ -4,18 +4,18 @@ import { User } from "../types/user";
 const UserContext = createContext<{
   user: User | null;
   setUser: React.Dispatch<React.SetStateAction<User | null>>;
-  token: string | null;
-  setToken: React.Dispatch<React.SetStateAction<string | null>>;
+  token: string | undefined | null;
+  setToken: React.Dispatch<React.SetStateAction<string | undefined | null>>;
 }>({
   user: null,
   setUser: () => {},
-  token: null,
+  token: undefined,
   setToken: () => {},
 });
 
 export function UserProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(null);
+  const [token, setToken] = useState<string | undefined | null>(undefined);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
