@@ -24,22 +24,22 @@ npm run dev
 
 Pour commencer à utiliser RTChat, vous devez d'abord créer un compte.
 
-![image register](/images/Capture d’écran 2025-05-30 à 09.21.26.png)
+![image register](https://github.com/Prumme/RTChat/blob/main/images/Capture%20d%E2%80%99%C3%A9cran%202025-05-30%20%C3%A0%2009.21.26.png?raw=true)
 
 ### 2. Création d'un second compte
 
 Pour tester la fonctionnalité de chat, créez un second compte utilisateur.
 
-[Insérez une capture d'écran du formulaire d'inscription avec des données différentes]
+![image register](https://github.com/Prumme/RTChat/blob/main/images/Capture%20d%E2%80%99%C3%A9cran%202025-05-30%20%C3%A0%2009.21.26.png?raw=true)
 
 ### 3. Recherche d'utilisateur
 
 Une fois connecté, utilisez la barre de recherche pour trouver d'autres utilisateurs et démarrer une conversation.
 
-[Insérez une capture d'écran de la fonction de recherche d'utilisateurs]
+![image register](https://github.com/Prumme/RTChat/blob/main/images/Capture%20d%E2%80%99%C3%A9cran%202025-05-30%20%C3%A0%2009.25.29.png?raw=true)
 
 ### 4. Envoi de messages
 
 Commencez à chatter ! Envoyez des messages en temps réel à vos contacts.
 
-[Insérez une capture d'écran de l'interface de chat]
+![image register](https://github.com/Prumme/RTChat/blob/main/images/Capture%20d%E2%80%99%C3%A9cran%202025-05-30%20%C3%A0%2009.26.20.png?raw=true)
