@@ -1,5 +1,17 @@
 # RTChat
 
+# Liste des Fonctionnalité
+
+- Login / Register / Logout
+- Systeme de profile avec modification de pseudo, de couleur personnel et de photo de profile
+- Creation de groupe de 2
+- Creation de groupe multiple >= 2
+- Envoi de message en temps réel
+- Reception de message en temps réel
+- Reception de notification si un groupe n'est pas ouvert mais que l'on reçoit un message
+- Chargement dynamique de l'historique des message (scroll infini)
+- Possibilité de voir quand un utilisateur est en train d'ecrire
+
 Application de chat en temps réel permettant aux utilisateurs de communiquer instantanément.
 
 ## Installation
