@@ -7,10 +7,19 @@ import { User, Users } from "lucide-react";
 import { useUser } from "../contexts/userContext";
 import { Chat } from "../types/chat";
 import { useSocket } from "../contexts/socketContext";
+import _ from "lodash";
 
 export default function ChatWindow() {
   const [loading, setLoading] = useState<boolean>(true);
   const [chats, setChats] = useState<Chat[]>([]);
+  const [page, setPage] = useState<number>(1);
+  const [hasMore, setHasMore] = useState<boolean>(true);
+  const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false);
+  const [reachedTop, setReachedTop] = useState<boolean>(false);
+  const [canLoadMore, setCanLoadMore] = useState<boolean>(false);
+  const [shouldScrollToBottom, setShouldScrollToBottom] =
+    useState<boolean>(true);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
   const { chatSocket } = useSocket();
   const [typingUsers, setTypingUsers] = useState<Set<string>>(new Set());
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -18,35 +27,99 @@ export default function ChatWindow() {
   const { user, token } = useUser();
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (!shouldScrollToBottom) return;
+
+    const container = chatContainerRef.current;
+    if (container) {
+      container.scrollTop = container.scrollHeight;
+    }
+  };
+
+  // Gestion du scroll automatique
+  useEffect(() => {
+    const container = chatContainerRef.current;
+    if (!container || isLoadingMore) return;
+
+    // Si on est proche du bas ou si c'est un nouveau message
+    const isNearBottom =
+      container.scrollHeight - container.scrollTop - container.clientHeight <
+      100;
+
+    if (shouldScrollToBottom || isNearBottom) {
+      scrollToBottom();
+    }
+  }, [chats, shouldScrollToBottom, isLoadingMore]);
+
+  // Détection du scroll manuel
+  const handleScroll = () => {
+    const container = chatContainerRef.current;
+    if (!container) return;
+
+    const isNearBottom =
+      container.scrollHeight - container.scrollTop - container.clientHeight <
+      100;
+    setShouldScrollToBottom(isNearBottom);
+
+    // Chargement de l'historique
+    if (
+      !isLoadingMore &&
+      !reachedTop &&
+      canLoadMore &&
+      container.scrollTop <= 100
+    ) {
+      loadMoreMessages();
+    }
+  };
+
+  const loadMoreMessages = async () => {
+    if (
+      !chatContainerRef.current ||
+      isLoadingMore ||
+      !hasMore ||
+      reachedTop ||
+      !canLoadMore
+    )
+      return;
+
+    setIsLoadingMore(true);
+    await fetchMessages(page + 1);
   };
 
   useEffect(() => {
-    scrollToBottom();
-  }, [chats, typingUsers]);
+    const container = chatContainerRef.current;
+    if (container) {
+      const throttledHandleScroll = _.throttle(handleScroll, 200);
+      container.addEventListener("scroll", throttledHandleScroll);
+      return () => {
+        container.removeEventListener("scroll", throttledHandleScroll);
+        throttledHandleScroll.cancel();
+      };
+    }
+  }, [page, isLoadingMore, hasMore, reachedTop, canLoadMore]);
 
   useEffect(() => {
     if (!chatSocket || !group) return;
 
-    // Rejoindre le chat du groupe
     chatSocket.emit("joinChat", group.id);
 
-    // Écouter les nouveaux messages
     chatSocket.on("newMessage", (message: Chat) => {
       setChats((prevChats) => [...prevChats, message]);
     });
 
-    chatSocket.on("userTyping", ({ user, isTyping }) => {
-      setTypingUsers((prev) => {
-        const newSet = new Set(prev);
-        if (isTyping) {
-          newSet.add(user.pseudo);
-        } else {
-          newSet.delete(user.pseudo);
-        }
-        return newSet;
-      });
-    });
+    chatSocket.on(
+      "userTyping",
+      ({ user, isTyping }: { user: { pseudo: string }; isTyping: boolean }) => {
+        setTypingUsers((prev) => {
+          const newSet = new Set(prev);
+          if (isTyping) {
+            newSet.add(user.pseudo);
+          } else {
+            newSet.delete(user.pseudo);
+          }
+          return newSet;
+        });
+      }
+    );
 
     return () => {
       chatSocket.emit("leaveChat", group.id);
@@ -56,9 +129,29 @@ export default function ChatWindow() {
   }, [chatSocket, group]);
 
   useEffect(() => {
-    const fetchMessages = async () => {
+    if (group) {
+      setPage(1);
+      setHasMore(true);
+      setReachedTop(false);
+      setCanLoadMore(false);
+      fetchMessages(1);
+      setLoading(false);
+
+      // Autoriser le chargement après 1 seconde
+      const timer = setTimeout(() => {
+        setCanLoadMore(true);
+      }, 1000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [group]);
+
+  const fetchMessages = async (pageNumber: number) => {
+    try {
       const response = await fetch(
-        `${import.meta.env.VITE_SERVER_URL}/chats/groups/${group!.id}`,
+        `${import.meta.env.VITE_SERVER_URL}/chats/groups/${
+          group!.id
+        }?page=${pageNumber}&limit=20`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -66,14 +159,36 @@ export default function ChatWindow() {
         }
       );
       const data = await response.json();
-      setChats(data);
-      setLoading(false);
-    };
 
-    if (group) {
-      fetchMessages();
+      if (pageNumber === 1) {
+        setChats(data.messages);
+        setShouldScrollToBottom(true);
+      } else {
+        const currentScrollTop = chatContainerRef.current?.scrollTop || 0;
+        const currentScrollHeight = chatContainerRef.current?.scrollHeight || 0;
+
+        const newMessages = [...data.messages, ...chats];
+        setChats(newMessages);
+        setShouldScrollToBottom(false);
+
+        setTimeout(() => {
+          if (chatContainerRef.current) {
+            const newScrollHeight = chatContainerRef.current.scrollHeight;
+            const scrollDiff = newScrollHeight - currentScrollHeight;
+            chatContainerRef.current.scrollTop = currentScrollTop + scrollDiff;
+          }
+        }, 0);
+      }
+
+      setHasMore(data.hasMore);
+      setPage(pageNumber);
+      setReachedTop(!data.hasMore);
+    } catch (error) {
+      console.error("Erreur lors du chargement des messages:", error);
+    } finally {
+      setIsLoadingMore(false);
     }
-  }, [group, token]);
+  };
 
   const getGroupName = (group: Group): string => {
     const usernamesJoined = group.participants
@@ -109,7 +224,7 @@ export default function ChatWindow() {
     if (!chatSocket || !user || !group) return;
 
     try {
-      // Envoyer le message via WebSocket
+      setShouldScrollToBottom(true);
       chatSocket.emit("sendMessage", {
         chatId: group.id,
         message,
@@ -121,7 +236,6 @@ export default function ChatWindow() {
         },
       });
 
-      // Réinitialiser le formulaire
       (e.target as HTMLFormElement).reset();
       handleTyping(false);
     } catch (error) {
@@ -149,7 +263,22 @@ export default function ChatWindow() {
         </div>
       )}
 
-      <div className="space-y-6 overflow-y-auto pr-4 p-8 pt-2 pb-0 grow">
+      <div
+        ref={chatContainerRef}
+        className="space-y-6 overflow-y-auto pr-4 p-8 pt-2 pb-0 grow"
+      >
+        {reachedTop && chats.length > 0 && (
+          <div className="text-center text-base-content/50 py-4">
+            Vous êtes au début de la conversation
+          </div>
+        )}
+
+        {isLoadingMore && (
+          <div className="text-center py-4">
+            <span className="loading loading-dots loading-md"></span>
+          </div>
+        )}
+
         {chats.length > 0 &&
           chats.map((chat) => <Message key={chat.id} message={chat} />)}
 

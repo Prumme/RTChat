@@ -7,6 +7,7 @@ import {
   Patch,
   Post,
   Req,
+  Query,
 } from '@nestjs/common';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { UserPayload } from 'src/common/guards/auth.guard';
@@ -27,8 +28,12 @@ export class ChatsController {
   }
 
   @Get('groups/:id')
-  findAll(@Param('id') id: string) {
-    return this.chatsService.findByGroup(id);
+  findAll(
+    @Param('id') id: string,
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 20,
+  ) {
+    return this.chatsService.findByGroup(id, page, limit);
   }
 
   @Get(':id')

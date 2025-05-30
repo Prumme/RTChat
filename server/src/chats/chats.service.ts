@@ -49,12 +49,20 @@ export class ChatsService {
     return this.chatRepository.findOne({ where: { id } });
   }
 
-  findByGroup(groupId: string) {
-    return this.chatRepository.find({
+  async findByGroup(groupId: string, page: number = 1, limit: number = 20) {
+    const [messages, total] = await this.chatRepository.findAndCount({
       where: { group: { id: groupId } },
-      order: { createdAt: 'ASC' },
+      order: { createdAt: 'DESC' },
       relations: ['sender'],
+      take: limit,
+      skip: (page - 1) * limit,
     });
+
+    return {
+      messages: messages.reverse(),
+      total,
+      hasMore: total > page * limit,
+    };
   }
 
   async update(id: string, updateChatDto: UpdateChatDto) {

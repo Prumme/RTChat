@@ -7,8 +7,6 @@ const AppLayout = () => {
   const { logout } = useAuth();
   const navigate = useNavigate();
 
-  console.log(user);
-
   if (user === null) {
     navigate("/login");
   }

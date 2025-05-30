@@ -5,7 +5,7 @@ import { useGroup } from "../contexts/groupContext";
 
 export default function ChatLayout() {
   const { group } = useGroup();
-  console.log("here");
+
   return (
     <div className="flex h-full overflow-scroll">
       <ChatSidebar />
