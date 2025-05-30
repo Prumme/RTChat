@@ -5,13 +5,28 @@ Application de chat en temps réel permettant aux utilisateurs de communiquer in
 ## Installation
 
 1. Clonez le repository
-2. À la racine du projet, lancez Docker Compose :
+
+2. Configurez les variables d'environnement :
+
+   - Dans le dossier `server` :
+
+   ```bash
+   cp .env.example .env
+   ```
+
+   - Dans le dossier `client` :
+
+   ```bash
+   cp .env.example .env
+   ```
+
+3. À la racine du projet, lancez Docker Compose :
 
 ```bash
 docker compose up -d
 ```
 
-3. Accédez au dossier client et lancez l'application en mode développement :
+4. Accédez au dossier client et lancez l'application en mode développement :
 
 ```bash
 cd client
